@@ -37,6 +37,29 @@ h1 {
     width: 100%;
 }
 
+/* Controles móveis (setas) */
+.mobile-controls {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 12px 0 4px;
+    width: 100%;
+}
+
+.mobile-controls .arrow {
+    padding: 10px 14px;
+    font-size: 20px;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 50%;
+}
+
+.mobile-controls .track-label {
+    font-size: 16px;
+    color: #333;
+}
+
 .legenda-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -95,4 +118,14 @@ a {
 
 #verde {
     color: green;
+}
+
+/* No mobile: esconder grade de botões e mostrar setas */
+@media (max-width: 768px) {
+    .botoes-container {
+        display: none;
+    }
+    .mobile-controls {
+        display: flex;
+    }
 }
