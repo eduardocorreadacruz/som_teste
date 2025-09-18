@@ -114,7 +114,7 @@ function updateTrackLabel() {
 		return;
 	}
 	if (currentIndex < 0) {
-		label.textContent = 'Use as setas para escolher';
+		label.textContent = 'escolha';
 		return;
 	}
 	label.textContent = `${currentIndex + 1} / ${playlist.length} · ${playlist[currentIndex].label}`;
