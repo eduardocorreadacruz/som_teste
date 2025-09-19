@@ -10,6 +10,9 @@
 <body>
     <div id="player-container">
         <div id="player"></div>
+            <video id="gta6-video" src="GTAVI.mp4" controls style="display:none; width:100%; max-width:400px; margin-top:10px;"></video>
+            <audio id="time-audio" src="TIME.mp3" controls style="display:none; width:100%; max-width:400px; margin-top:10px;"></audio>
+            <audio id="tlou-audio" src="TLOU.mp3" controls style="display:none; width:100%; max-width:400px; margin-top:10px;"></audio>
     </div>
 	<!-- Controles móveis: navegação por setas -->
 	<div class="mobile-controls" aria-label="Navegação por setas (mobile)">
@@ -25,18 +28,18 @@
     <div class="botoes-container">
         <button data-video-url="https://www.youtube.com/watch?v=U-tWqEod9Ig&list=PLJCXrsW_esBlb1BYfeNhY4kJQuNYoDpF_&index=3https://www.youtube.com/watch?v=VIDEO_ID_3" data-start-time="0">Biblioteca</button>
         <button data-video-url="https://www.youtube.com/watch?v=8vihvyeiQu8" data-start-time="0">Portal (Abertura)</button>
-        <a href="https://www.youtube.com/watch?v=j1M9tZGznx0&list=RDj1M9tZGznx0&start_radio=1&t=1s" target="_blank">Tema Inception</a>
+        <button id="time-local" data-audio-url="local-mp3" data-start-time="115">Tema Inception</button>
         <button data-video-url="https://www.youtube.com/watch?v=DrmpZtxr0kY" data-start-time="0">Audio Nostalgico</button>
         <button data-video-url="https://www.youtube.com/watch?v=aTfDtUFiquY" data-start-time="70">Som Arcade</button>
         <button data-video-url="https://www.youtube.com/watch?v=_P_ylHNVnCo" data-start-time="85">Megalovania</button>
         <button data-video-url="https://www.youtube.com/watch?v=tAaGKo4XVvM&list=RDtAaGKo4XVvM&start_radio=1">Super Mario</button>
         <button data-video-url="https://www.youtube.com/watch?v=jN1wIy-rvo8" data-start-time="115">Mice on Venus</button>
         <button data-video-url="https://www.youtube.com/watch?v=5SrwfoCd8Pg" data-start-time="115">CS:GO Main Theme</button>
-        <button data-video-url="https://www.youtube.com/watch?v=ej441bTQMjw" data-start-time="115">Bomb Planted</button>
+        <button data-video-url="https://www.youtube.com/watch?v=ej441bTQMjw" data-start-time="0">Bomb Planted</button>
         <button data-video-url="https://www.youtube.com/watch?v=gRutwGcsgFs" data-start-time="115">Tlou Theme</button>
-        <a href="https://www.youtube.com/watch?v=Yv-4FMxXJn4&list=RDYv-4FMxXJn4&start_radio=1" target="_blank">Musica GTA 6</a>
+        <button id="gta6-local" data-video-url="./Audios/GTAVI" data-start-time="0">Musica GTA 6</button>
         <button data-video-url="https://www.youtube.com/watch?v=NGV04Q-GvB0" data-start-time="115">Musica GTA 5</button>
-        <a data-start-time="115" href="https://www.youtube.com/watch?v=vC4CfQJLhuk" target="_blank">SoundTrack Tlou</a>
+        <button id="tlou-local" data-video-url="./Audios/TLOU" data-start-time="0">Sound Track TLOU</button>
     </div>
 </body>
 </html>

@@ -10,62 +10,97 @@ let currentIndex = -1;
 
 // 2. Esta função é chamada automaticamente quando a API do YouTube está pronta
 function onYouTubeIframeAPIReady() {
-	player = new YT.Player('player', {
-		height: '390',
-		width: '640',
-		playerVars: {
-			'controls': 1
-		}
-	});
+    player = new YT.Player('player', {
+        height: '390',
+        width: '640',
+        playerVars: {
+            'controls': 1
+        }
+    });
 
-	// 3. Seleciona todos os botões e adiciona um "ouvinte de evento" de clique
-	const buttons = document.querySelectorAll('.botoes-container button');
-	const links = document.querySelectorAll('.botoes-container a');
+    const buttons = document.querySelectorAll('.botoes-container button');
 
-	// Construir playlist: apenas itens que tocam no iframe (botões vermelhos)
-	playlist = Array.from(buttons).map((button, idx) => ({
-		label: button.textContent?.trim() || `Som ${idx + 1}`,
-		videoUrl: button.dataset.videoUrl,
-		startTime: parseInt(button.dataset.startTime, 10) || 0
-	}));
+    // Construir playlist: apenas itens que tocam no iframe (botões vermelhos)
+    playlist = [
+        // Botões do YouTube
+        ...Array.from(buttons).filter(btn =>
+            !['gta6-local', 'time-local', 'tlou-local'].includes(btn.id)
+        ).map((button, idx) => ({
+            label: button.textContent?.trim() || `Som ${idx + 1}`,
+            type: 'youtube',
+            videoUrl: button.dataset.videoUrl,
+            startTime: parseInt(button.dataset.startTime, 10) || 0
+        })),
+        // Arquivos locais
+        {
+            label: 'Musica GTA 6',
+            type: 'local-video',
+            elementId: 'gta6-video'
+        },
+        {
+            label: 'TIME (Hans Zimmer)',
+            type: 'local-audio',
+            elementId: 'time-audio'
+        },
+        {
+            label: 'Sound Track TLOU',
+            type: 'local-audio',
+            elementId: 'tlou-audio'
+        }
+    ];
 
-	// Atualizar rótulo inicial
-	updateTrackLabel();
+    // Atualizar rótulo inicial
+    updateTrackLabel();
 
-	buttons.forEach((button, idx) => {
-		button.addEventListener('click', () => {
-			const videoUrl = button.dataset.videoUrl;
-			const startTime = parseInt(button.dataset.startTime, 10);
+    // Listeners dos botões do YouTube
+    buttons.forEach((button, idx) => {
+        if (['gta6-local', 'time-local', 'tlou-local'].includes(button.id)) return;
+        button.addEventListener('click', () => {
+            const videoUrl = button.dataset.videoUrl;
+            const startTime = parseInt(button.dataset.startTime, 10);
+            const videoId = getVideoId(videoUrl);
+            if (videoId) {
+                tocarSom(videoId, startTime);
+                currentIndex = idx;
+                updateTrackLabel();
+            }
+        });
+    });
 
-			// Adicione esta linha para ver a URL que está sendo processada
-			console.log(`Tentando extrair ID da URL: ${videoUrl}`);
-			
-			const videoId = getVideoId(videoUrl);
-			if (videoId) {
-				console.log(`ID do vídeo extraído com sucesso: ${videoId}`);
-				tocarSom(videoId, startTime);
-				currentIndex = idx;
-				updateTrackLabel();
-			} else {
-				console.error(`Erro: ID de vídeo inválido ou não encontrado na URL: ${videoUrl}`);
-			}
-		});
-	});
+    // Listeners dos botões locais
+    document.getElementById('gta6-local').addEventListener('click', function() {
+        currentIndex = playlist.findIndex(t => t.type === 'local-video');
+        playCurrent();
+    });
+    document.getElementById('time-local').addEventListener('click', function() {
+        currentIndex = playlist.findIndex(t => t.label === 'TIME (Hans Zimmer)');
+        playCurrent();
+    });
+    document.getElementById('tlou-local').addEventListener('click', function() {
+        currentIndex = playlist.findIndex(t => t.label === 'Sound Track TLOU');
+        playCurrent();
+    });
 
-	// Controles por teclado (setas esquerda/direita)
-	document.addEventListener('keydown', (ev) => {
-		if (ev.key === 'ArrowRight') {
-			nextTrack();
-		} else if (ev.key === 'ArrowLeft') {
-			prevTrack();
-		}
-	});
+    // Listeners dos botões de navegação
+    document.getElementById('prev-track').addEventListener('click', prevTrack);
+    document.getElementById('next-track').addEventListener('click', nextTrack);
 
-	// Controles por botões de setas no mobile
-	const prevBtn = document.getElementById('prev-track');
-	const nextBtn = document.getElementById('next-track');
-	prevBtn?.addEventListener('click', prevTrack);
-	nextBtn?.addEventListener('click', nextTrack);
+    // Listeners para pausar tudo ao clicar em outros botões
+    document.querySelectorAll('.botoes-container button:not(#gta6-local):not(#time-local):not(#tlou-local)').forEach(btn => {
+        btn.addEventListener('click', function() {
+            stopLocalMedia();
+            document.getElementById('player-container').style.display = 'block';
+        });
+    });
+
+    // Listeners de teclado
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'ArrowRight') {
+            nextTrack();
+        } else if (ev.key === 'ArrowLeft') {
+            prevTrack();
+        }
+    });
 }
 
 // 4. Nova e mais robusta função para extrair o ID do vídeo da URL
@@ -89,22 +124,66 @@ function tocarSom(videoId, startTime) {
 }
 
 function nextTrack() {
-	if (!playlist.length) return;
-	if (currentIndex < 0) currentIndex = 0; else currentIndex = (currentIndex + 1) % playlist.length;
-	const { videoUrl, startTime } = playlist[currentIndex];
-	const videoId = getVideoId(videoUrl);
-	if (videoId) tocarSom(videoId, startTime);
-	updateTrackLabel();
+    if (!playlist.length) return;
+    currentIndex = (currentIndex + 1) % playlist.length;
+    playCurrent();
 }
 
 function prevTrack() {
-	if (!playlist.length) return;
-	if (currentIndex < 0) currentIndex = playlist.length - 1; else currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-	const { videoUrl, startTime } = playlist[currentIndex];
-	const videoId = getVideoId(videoUrl);
-	if (videoId) tocarSom(videoId, startTime);
-	updateTrackLabel();
+    if (!playlist.length) return;
+    currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+    playCurrent();
 }
+
+function playCurrent() {
+    stopLocalMedia();
+    const track = playlist[currentIndex];
+    if (track.type === 'youtube') {
+        const videoId = getVideoId(track.videoUrl);
+        if (videoId) tocarSom(videoId, track.startTime);
+        document.getElementById('player-container').style.display = 'block';
+        updateTrackLabel();
+    } else if (track.type === 'local-video') {
+        document.getElementById('player-container').style.display = 'none';
+        const video = document.getElementById(track.elementId);
+        video.style.display = 'block';
+        video.currentTime = 0;
+        video.play();
+        updateTrackLabelGTA6();
+    } else if (track.type === 'local-audio') {
+        document.getElementById('player-container').style.display = 'none';
+        const audio = document.getElementById(track.elementId);
+        audio.volume = 1.0;
+        audio.style.display = 'block';
+        audio.currentTime = 0;
+        audio.play();
+        if (track.elementId === 'time-audio') updateTrackLabelTIME();
+        else if (track.elementId === 'tlou-audio') updateTrackLabelTLOU();
+    }
+}
+
+// Atualize todos os handlers para usar stopLocalMedia antes de mostrar o novo conteúdo
+
+document.getElementById('gta6-local').addEventListener('click', function() {
+    currentIndex = playlist.findIndex(t => t.type === 'local-video');
+    playCurrent();
+});
+document.getElementById('time-local').addEventListener('click', function() {
+    currentIndex = playlist.findIndex(t => t.label === 'TIME (Hans Zimmer)');
+    playCurrent();
+});
+document.getElementById('tlou-local').addEventListener('click', function() {
+    currentIndex = playlist.findIndex(t => t.label === 'Sound Track TLOU');
+    playCurrent();
+});
+
+// Ao clicar em outros botões, pare tudo local e mostre o player do YouTube
+document.querySelectorAll('.botoes-container button:not(#gta6-local):not(#time-local):not(#tlou-local)').forEach(btn => {
+    btn.addEventListener('click', function() {
+        stopLocalMedia();
+        document.getElementById('player-container').style.display = 'block';
+    });
+});
 
 function updateTrackLabel() {
 	const label = document.getElementById('current-track-label');
@@ -118,4 +197,38 @@ function updateTrackLabel() {
 		return;
 	}
 	label.textContent = `${currentIndex + 1} / ${playlist.length} · ${playlist[currentIndex].label}`;
+}
+
+function updateTrackLabelGTA6() {
+    const label = document.getElementById('current-track-label');
+    label.textContent = 'Musica GTA 6 (MP4)';
+}
+
+function stopLocalMedia() {
+    // Pausa e esconde vídeo GTA6
+    const video = document.getElementById('gta6-video');
+    video.pause();
+    video.style.display = 'none';
+    // Pausa e esconde áudio TIME
+    const timeAudio = document.getElementById('time-audio');
+    timeAudio.pause();
+    timeAudio.style.display = 'none';
+    // Pausa e esconde áudio TLOU
+    const tlouAudio = document.getElementById('tlou-audio');
+    tlouAudio.pause();
+    tlouAudio.style.display = 'none';
+    // Pausa o player do YouTube se estiver disponível
+    if (player && typeof player.pauseVideo === 'function') {
+        player.pauseVideo();
+    }
+}
+
+function updateTrackLabelTIME() {
+    const label = document.getElementById('current-track-label');
+    label.textContent = 'TIME (Hans Zimmer) (MP3)';
+}
+
+function updateTrackLabelTLOU() {
+    const label = document.getElementById('current-track-label');
+    label.textContent = 'Sound Track TLOU (MP3)';
 }
