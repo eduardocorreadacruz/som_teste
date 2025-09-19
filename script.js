@@ -147,7 +147,7 @@ function playCurrent() {
         document.getElementById('player-container').style.display = 'none';
         const video = document.getElementById(track.elementId);
         video.style.display = 'block';
-        video.currentTime = 0;
+        video.currentTime = 0; // sempre reinicia
         video.play();
         updateTrackLabelGTA6();
     } else if (track.type === 'local-audio') {
@@ -155,7 +155,7 @@ function playCurrent() {
         const audio = document.getElementById(track.elementId);
         audio.volume = 1.0;
         audio.style.display = 'block';
-        audio.currentTime = 0;
+        audio.currentTime = 0; // sempre reinicia
         audio.play();
         if (track.elementId === 'time-audio') updateTrackLabelTIME();
         else if (track.elementId === 'tlou-audio') updateTrackLabelTLOU();
@@ -163,19 +163,6 @@ function playCurrent() {
 }
 
 // Atualize todos os handlers para usar stopLocalMedia antes de mostrar o novo conteúdo
-
-document.getElementById('gta6-local').addEventListener('click', function() {
-    currentIndex = playlist.findIndex(t => t.type === 'local-video');
-    playCurrent();
-});
-document.getElementById('time-local').addEventListener('click', function() {
-    currentIndex = playlist.findIndex(t => t.label === 'TIME (Hans Zimmer)');
-    playCurrent();
-});
-document.getElementById('tlou-local').addEventListener('click', function() {
-    currentIndex = playlist.findIndex(t => t.label === 'Sound Track TLOU');
-    playCurrent();
-});
 
 // Ao clicar em outros botões, pare tudo local e mostre o player do YouTube
 document.querySelectorAll('.botoes-container button:not(#gta6-local):not(#time-local):not(#tlou-local)').forEach(btn => {
@@ -208,14 +195,17 @@ function stopLocalMedia() {
     // Pausa e esconde vídeo GTA6
     const video = document.getElementById('gta6-video');
     video.pause();
+    video.currentTime = 0; // sempre reinicia
     video.style.display = 'none';
     // Pausa e esconde áudio TIME
     const timeAudio = document.getElementById('time-audio');
     timeAudio.pause();
+    timeAudio.currentTime = 0; // sempre reinicia
     timeAudio.style.display = 'none';
     // Pausa e esconde áudio TLOU
     const tlouAudio = document.getElementById('tlou-audio');
     tlouAudio.pause();
+    tlouAudio.currentTime = 0; // sempre reinicia
     tlouAudio.style.display = 'none';
     // Pausa o player do YouTube se estiver disponível
     if (player && typeof player.pauseVideo === 'function') {
